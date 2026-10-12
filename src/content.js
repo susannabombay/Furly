@@ -20,6 +20,7 @@ import {
   Coffee, UtensilsCrossed, Croissant, Soup,
   Building2, PlaneTakeoff, PlaneLanding, Plane,
   Thermometer, Pill, Wind, Bandage, Zap, PawPrint,
+  Sun, Moon, Hotel, HeartHandshake,
 } from 'lucide-react'
 
 // Activities a pet can "like". Shown as tappable chips on the pet form and
@@ -88,6 +89,57 @@ export const FOOD_PLACES = [
     area: 'Holland Village', perks: ['Air-conditioned pet area', 'Treat jar at the counter'] },
 ]
 
+// ── Requirements: things Furly can check from a pet's profile ───────────────
+// Used by the daycare checklist (Travel) and the readiness badge on
+// daycare & boarding listings (Explore → Care), so both always agree.
+const isCurrent = (v) => !v.due || new Date(v.due) > new Date()
+const hasVaccine = (pet, pattern) =>
+  (pet.vaccinations || []).some((v) => pattern.test(v.name) && isCurrent(v))
+
+export const REQUIREMENTS = {
+  core: {
+    label: 'Core vaccinations up to date',
+    check: (pet) => (pet.vaccinations || []).length > 0 && pet.vaccinations.every(isCurrent),
+  },
+  kennel: {
+    label: 'Kennel cough vaccine',
+    // Only dogs need it, so cats always pass this one.
+    check: (pet) => pet.species !== 'Dog' || hasVaccine(pet, /kennel|bordetella/i),
+  },
+  licence: {
+    label: 'AVS licence number',
+    check: (pet) => Boolean(pet.licence),
+  },
+  vet: {
+    label: 'Vet’s name and phone',
+    check: (pet) => Boolean(pet.vetName && pet.vetPhone),
+  },
+}
+
+// ── Daycare & boarding listings (Explore → Care) ────────────────────────────
+// SAMPLE DATA: real neighbourhoods, made-up businesses and prices, so there
+// are no phone numbers or websites yet. Real, verified providers will come
+// from the database later.
+// `requires` lists REQUIREMENTS ids; `species` says which pets they accept.
+export const CARE_PLACES = [
+  { id: 'cp1', icon: Sun, color: 'lime', name: 'Sunny Paws Daycare', type: 'Daycare',
+    area: 'Tampines', price: 'From S$45 / day', species: ['Dog'],
+    requires: ['core', 'kennel', 'licence'],
+    perks: ['CCTV livestream', 'Air-conditioned play area', 'Pickup service'] },
+  { id: 'cp2', icon: Hotel, color: 'sky', name: 'Happy Tails Boarding', type: 'Boarding',
+    area: 'Pasir Ris', price: 'From S$60 / night', species: ['Dog'],
+    requires: ['core', 'kennel', 'licence', 'vet'],
+    perks: ['Grass yard', 'Staff on site 24h', 'Daily photo updates'] },
+  { id: 'cp3', icon: Moon, color: 'lilac', name: 'The Kitty Inn', type: 'Cat boarding',
+    area: 'Bukit Timah', price: 'From S$35 / night', species: ['Cat'],
+    requires: ['core', 'licence'],
+    perks: ['Private cat condos', 'Quiet, dog-free', 'Daily photo updates'] },
+  { id: 'cp4', icon: HeartHandshake, color: 'blush', name: 'Home Hugs Pet Sitting', type: 'Home boarding',
+    area: 'Clementi', price: 'From S$50 / night', species: ['Dog', 'Cat'],
+    requires: ['core'],
+    perks: ['Max 3 pets at a time', 'Lives with the sitter', 'Small dogs & cats'] },
+]
+
 // ── Travel: checklists and regulations ──────────────────────────────────────
 // Each checklist item has a `check` function. It looks at the pet's saved
 // details and returns true/false, so Furly can tick items off automatically.
@@ -110,14 +162,15 @@ export const FLIGHT_CHECKLIST = [
 
 export const DAYCARE_CHECKLIST = [
   { id: 'core', label: 'Core vaccinations up to date (e.g. 5-in-1 for dogs, 3-in-1 for cats)',
-    check: (pet) => (pet.vaccinations || []).length > 0 &&
-      (pet.vaccinations || []).every((v) => !v.due || new Date(v.due) > new Date()) },
+    check: REQUIREMENTS.core.check },
   { id: 'vet', label: 'Your vet’s name and phone number on file',
-    check: (pet) => Boolean(pet.vetName && pet.vetPhone) },
+    check: REQUIREMENTS.vet.check },
   { id: 'meds', label: 'Medications and allergies written down',
     check: (pet) => Boolean(pet.medications || pet.allergies) },
-  { id: 'licence', label: 'AVS pet licence (PALS) valid: most daycares ask for it' },
-  { id: 'kennel', label: 'Kennel cough vaccine, required by most daycares and boarders' },
+  { id: 'licence', label: 'AVS pet licence (PALS) number: most daycares ask for it',
+    check: REQUIREMENTS.licence.check },
+  { id: 'kennel', label: 'Kennel cough vaccine (dogs), required by most daycares and boarders',
+    check: REQUIREMENTS.kennel.check },
   { id: 'tick', label: 'Tick and flea prevention current (tick fever is common in Singapore)' },
   { id: 'temperament', label: 'Temperament assessment or trial day booked' },
 ]

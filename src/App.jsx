@@ -34,6 +34,7 @@ export default function App() {
   const [pets, setPets] = useStoredState('pets', [])            // list of pet objects
   const [activePetId, setActivePetId] = useStoredState('activePet', null)
   const [signups, setSignups] = useStoredState('signups', [])   // list of event ids
+  const [reminders, setReminders] = useStoredState('reminders', []) // { id, petId, title, date, time, repeat }
   const [emergency, setEmergency] = useStoredState('emergency', {
     contactName: '', contactPhone: '', vetName: '', vetPhone: '', vetAddress: '',
   })
@@ -43,10 +44,14 @@ export default function App() {
   const [addingPet, setAddingPet] = useState(false)
   const [editingPet, setEditingPet] = useState(false) // opens the Health tab straight into "Edit"
 
+  const [exploreView, setExploreView] = useState('events') // Events / Food / Care
+
   // Switch tab and scroll back to the top, like a real app.
-  function goTo(id) {
+  // `view` optionally opens Explore on a specific toggle, e.g. goTo('explore', 'care').
+  function goTo(id, view = 'events') {
     setTab(id)
     setEditingPet(false)
+    if (id === 'explore') setExploreView(view)
     window.scrollTo(0, 0)
   }
 
@@ -73,6 +78,14 @@ export default function App() {
     setSignups((list) =>
       list.includes(eventId) ? list.filter((id) => id !== eventId) : [...list, eventId],
     )
+  }
+
+  function addReminder(reminder) {
+    setReminders((list) => [...list, reminder])
+  }
+
+  function deleteReminder(id) {
+    setReminders((list) => list.filter((r) => r.id !== id))
   }
 
   function signOut() {
@@ -124,14 +137,21 @@ export default function App() {
             onSelectPet={setActivePetId}
             onAddPet={() => setAddingPet(true)}
             onEditPet={() => { setTab('pets'); setEditingPet(true) }}
-            signups={signups} emergency={emergency} goTo={goTo}
+            signups={signups} reminders={reminders}
+            onAddReminder={addReminder} onDeleteReminder={deleteReminder}
+            emergency={emergency} goTo={goTo}
           />
         )}
         {tab === 'pets' && (
           <Pets key={pet.id + editingPet} pet={pet} startEditing={editingPet} onSave={savePet} onDelete={deletePet} />
         )}
-        {tab === 'travel' && <Travel key={pet.id} pet={pet} />}
-        {tab === 'explore' && <Explore pet={pet} signups={signups} onToggle={toggleSignup} />}
+        {tab === 'travel' && <Travel key={pet.id} pet={pet} goTo={goTo} />}
+        {tab === 'explore' && (
+          <Explore
+            key={pet.id + exploreView} pet={pet} signups={signups} onToggle={toggleSignup}
+            initialView={exploreView} goTo={goTo}
+          />
+        )}
         {tab === 'settings' && (
           <Settings user={user} emergency={emergency} onSaveEmergency={setEmergency} onSignOut={signOut} />
         )}

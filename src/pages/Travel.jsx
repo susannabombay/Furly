@@ -61,7 +61,7 @@ function Checklist({ title, icon: Icon, items, pet, ticks, onTick }) {
   )
 }
 
-export default function Travel({ pet }) {
+export default function Travel({ pet, goTo }) {
   // Manual ticks are saved per pet, e.g. under the key "travel:ab12cd34".
   const [ticks, setTicks] = useStoredState(`travel:${pet.id}`, {})
   const toggle = (id) => setTicks({ ...ticks, [id]: !ticks[id] })
@@ -73,6 +73,9 @@ export default function Travel({ pet }) {
 
       <Checklist title="Flying" icon={Plane} items={FLIGHT_CHECKLIST} pet={pet} ticks={ticks} onTick={toggle} />
       <Checklist title="Daycare & boarding" icon={House} items={DAYCARE_CHECKLIST} pet={pet} ticks={ticks} onTick={toggle} />
+      <button className="btn block" onClick={() => goTo('explore', 'care')}>
+        Find daycare & boarding <ChevronRight size={18} />
+      </button>
 
       <section className="section">
         <div className="section-head"><h2>Singapore rules</h2></div>

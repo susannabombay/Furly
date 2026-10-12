@@ -4,7 +4,8 @@ A social pet app **for Singapore**. Pet owners sign in, set up a profile for eac
 
 - **Health**: breed, age, weight, microchip, vaccinations with due-date reminders, vet, allergies and medications.
 - **Travel**: flight and daycare checklists that tick themselves off from the pet's profile, plus Singapore rules: AVS licensing (PALS), HDB pet rules, export and import licences, and quarantine.
-- **Explore**: pet events at Singapore parks and dog runs (pets that like swimming see swim events first) and pet-friendly food places.
+- **Coming up** (Home): a 7-day strip (expandable to a full month calendar) and agenda combining event sign-ups, vaccine due dates and your own repeating reminders (e.g. monthly tick prevention), each addable to Apple, Outlook or Google Calendar.
+- **Explore**: pet events at Singapore parks and dog runs (pets that like swimming see swim events first), pet-friendly food places, and daycare & boarding with a badge showing whether your pet already meets each place's requirements.
 - **Settings**: your emergency vet and a backup person (one-tap call), Singapore's 24-hour vets and the AVS hotline, step-by-step first aid (heatstroke first), and a quick Q&A.
 
 > **Current stage: local first.** Everything is saved in your browser only. There are no real accounts or server yet, and the events and places are sample data. A real backend comes next.
@@ -37,16 +38,18 @@ Furly/
     ├── main.jsx        Starting point: plugs <App /> into index.html.
     ├── App.jsx         The brain: holds all data, sign-in flow, top bar & tab bar.
     ├── storage.js      Saves/loads data (browser storage now, a real database later).
-    ├── content.js      All fixed text: events, food places, travel rules, first aid, Q&A.
+    ├── content.js      All fixed text: events, places, daycare listings, requirements, rules, first aid, Q&A.
+    ├── calendar.js     Date logic: the agenda, repeating reminders, "Add to calendar" files/links.
     ├── styles.css      The look: colours at the top, phone-first layout, animations.
     ├── components/
-    │   └── PetCard.jsx     The pet ID card that expands when tapped (Singpass-style)
+    │   ├── PetCard.jsx     The pet ID card that expands when tapped (Singpass-style)
+    │   └── Agenda.jsx      "Coming up" on Home: week strip, month calendar, agenda list, add-reminder form
     └── pages/          One file per screen:
         ├── SignIn.jsx      Name + email to get started
         ├── Home.jsx        Dashboard: pet ID cards, quick actions, reminders, recommendations
         ├── Pets.jsx        "Health" tab: pet profile form (with photo), vaccinations, medical notes
         ├── Travel.jsx      Flight & daycare checklists, destination rules
-        ├── Explore.jsx     Events (with sign-up) and food places
+        ├── Explore.jsx     Events (with sign-up), food places, daycare & boarding
         └── Settings.jsx    Emergency contacts, hotlines, first aid, Q&A, sign out
 ```
 
@@ -64,6 +67,8 @@ Furly/
 | Add or change an event, food place, first-aid guide or Q&A | `src/content.js` |
 | Add a new activity a pet can like | `ACTIVITIES` in `src/content.js` |
 | Add a travel checklist item | `FLIGHT_CHECKLIST` / `DAYCARE_CHECKLIST` in `src/content.js` |
+| Add a daycare/boarding listing | `CARE_PLACES` in `src/content.js` (`requires` uses ids from `REQUIREMENTS`) |
+| Add a quick reminder preset | `REMINDER_PRESETS` in `src/calendar.js` |
 | Change the colours | The variables at the top of `src/styles.css` (`--forest`, `--lime`, …) |
 | Change an icon | Pick one at [lucide.dev/icons](https://lucide.dev/icons) and swap the import |
 | Add a field to the pet profile | `EMPTY_PET` and `PetForm` in `src/pages/Pets.jsx` |
@@ -87,7 +92,8 @@ git push
 - [ ] Real events and food places based on the user's location
 - [ ] Owners can create their own events and see who's going
 - [ ] Pet photos
-- [ ] Vaccination reminders by email or notification
+- [ ] Push notifications for reminders (needs the backend; until then, "Add to calendar" does the reminding)
+- [ ] Real, verified daycare & boarding providers with in-app booking
 - [ ] Find the nearest open emergency vet automatically
 
 ⚠️ Rules and phone numbers in `src/content.js` were checked against AVS (avs.nparks.gov.sg) and each clinic's website in October 2026. Re-check them before launch. Travel rules and first-aid content are general guidance only: always confirm with AVS, the airline and a vet.

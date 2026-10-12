@@ -5,16 +5,14 @@
 //   • greeting + your initial (tap it for Settings)
 //   • pet ID cards: swipe between pets, tap one to expand it
 //   • quick actions: Health, Travel, Events, Emergency
-//   • health reminders (vaccines overdue or due soon)
-//   • your upcoming events
+//   • "Coming up": week strip + agenda of events, vaccines and reminders
 //   • events recommended for your pet
 // ─────────────────────────────────────────────────────────────────────────────
 import { useState } from 'react'
-import { Stethoscope, Luggage, Compass, Siren, Plus, ChevronRight, CalendarDays, Syringe, Sparkles } from 'lucide-react'
-import { EVENTS } from '../content.js'
-import { vaccineStatus, formatDay } from './Pets.jsx'
+import { Stethoscope, Luggage, Compass, Siren, Plus, ChevronRight, Sparkles } from 'lucide-react'
 import { formatDate, recommendEvents } from './Explore.jsx'
 import { PetCard, ExpandedPetCard } from '../components/PetCard.jsx'
+import Agenda from '../components/Agenda.jsx'
 
 // "Good morning" / "Good afternoon" / "Good evening" based on the time.
 function greeting() {
@@ -22,14 +20,13 @@ function greeting() {
   return hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
 }
 
-export default function Home({ user, pets, pet, onSelectPet, onAddPet, onEditPet, signups, emergency, goTo }) {
+export default function Home({
+  user, pets, pet, onSelectPet, onAddPet, onEditPet,
+  signups, reminders, onAddReminder, onDeleteReminder, emergency, goTo,
+}) {
   // Which card is expanded, and where it started on screen (for the animation).
   const [open, setOpen] = useState(null) // { pet, rect } or null
 
-  const alerts = pet.vaccinations
-    .map((v) => ({ ...v, status: vaccineStatus(v) }))
-    .filter((v) => v.status.tone === 'bad' || v.status.tone === 'warn')
-  const myEvents = EVENTS.filter((e) => signups.includes(e.id))
   const recommended = recommendEvents(pet).filter((e) => !signups.includes(e.id)).slice(0, 4)
   const firstName = user.name.split(' ')[0]
 
@@ -84,51 +81,11 @@ export default function Home({ user, pets, pet, onSelectPet, onAddPet, onEditPet
         <button onClick={emergencyAction}><span className="icon-circle red"><Siren size={22} /></span>Emergency</button>
       </nav>
 
-      {/* Health reminders */}
-      <section className="section">
-        <div className="section-head">
-          <h2>Health reminders</h2>
-          <button className="link-btn" onClick={() => goTo('pets')}>Record <ChevronRight size={16} /></button>
-        </div>
-        <div className="card">
-          {alerts.length === 0 ? (
-            <div className="row-item" style={{ padding: 0, border: 0 }}>
-              <span className="icon-tile"><Syringe size={20} /></span>
-              <p className="empty grow">
-                {pet.vaccinations.length
-                  ? `All of ${pet.name}’s vaccinations are up to date.`
-                  : `Add ${pet.name}’s vaccinations to get reminders.`}
-              </p>
-            </div>
-          ) : (
-            <ul className="rows">
-              {alerts.map((v) => (
-                <li key={v.id} className="row-item">
-                  <span className="icon-tile red"><Syringe size={20} /></span>
-                  <div className="grow"><strong>{v.name}</strong><span className="tiny muted">Due {formatDay(v.due)}</span></div>
-                  <span className={'badge ' + v.status.tone}>{v.status.label}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </section>
-
-      {/* Upcoming events you've joined */}
-      {myEvents.length > 0 && (
-        <section className="section">
-          <div className="section-head"><h2>Your upcoming events</h2></div>
-          <ul className="card rows">
-            {myEvents.map((e) => (
-              <li key={e.id} className="row-item">
-                <span className={'icon-tile art ' + e.color}><e.icon size={20} /></span>
-                <div className="grow"><strong>{e.title}</strong><span className="tiny muted">{formatDate(e.date)}</span></div>
-                <CalendarDays size={18} color="var(--muted)" aria-hidden="true" />
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      {/* Events, vaccines and reminders on one timeline */}
+      <Agenda
+        pets={pets} pet={pet} signups={signups} reminders={reminders}
+        onAddReminder={onAddReminder} onDeleteReminder={onDeleteReminder} goTo={goTo}
+      />
 
       {/* Recommended events, as a swipeable row */}
       {recommended.length > 0 && (
