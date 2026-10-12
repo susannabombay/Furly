@@ -35,41 +35,42 @@ export const ACTIVITIES = [
 // organisers are made up until real ones come from the database.
 // `tags` are matched against a pet's liked activities to recommend events.
 // `icon` + `color` draw the event's artwork (colours are defined in styles.css).
+// `forSpecies` says which pets can join; leave it out to welcome everyone.
 // Events are early morning or evening on purpose: Singapore's midday heat
 // and hot pavements are hard on paws.
 export const EVENTS = [
   {
-    id: 'ev1', icon: Footprints, color: 'sage', title: 'Sunrise Pack Walk',
+    id: 'ev1', forSpecies: ['Dog'], icon: Footprints, color: 'sage', title: 'Sunrise Pack Walk',
     date: '2026-10-17T07:30', place: 'Bishan-Ang Mo Kio Park (dog run)',
     tags: ['Walks', 'Socialising'], spots: 20,
     description: 'Easy 4 km loop along the river before it gets hot. All sizes welcome, leads required.',
   },
   {
-    id: 'ev2', icon: Waves, color: 'sky', title: 'Doggy Splash Session',
+    id: 'ev2', forSpecies: ['Dog'], icon: Waves, color: 'sky', title: 'Doggy Splash Session',
     date: '2026-10-18T09:00', place: 'Dog swimming pool, Pasir Ris',
     tags: ['Swimming', 'Beach', 'Fetch'], spots: 15,
     description: 'Supervised swim with life jackets available. The best way to cool off in this weather!',
   },
   {
-    id: 'ev3', icon: Target, color: 'lime', title: 'Beginner Agility Class',
+    id: 'ev3', forSpecies: ['Dog'], icon: Target, color: 'lime', title: 'Beginner Agility Class',
     date: '2026-10-21T19:00', place: 'West Coast Park (dog run)',
     tags: ['Agility', 'Training', 'Running'], spots: 8,
     description: 'Tunnels, jumps and weave poles with a trainer, after sunset when it’s cooler.',
   },
   {
-    id: 'ev4', icon: Mountain, color: 'sand', title: 'Southern Ridges Morning Hike',
+    id: 'ev4', forSpecies: ['Dog'], icon: Mountain, color: 'sand', title: 'Southern Ridges Morning Hike',
     date: '2026-10-24T07:00', place: 'Henderson Waves, Southern Ridges',
     tags: ['Hiking', 'Walks', 'Running'], spots: 12,
     description: 'Shaded 6 km route with water stops. Fit adult dogs only, leashed throughout.',
   },
   {
-    id: 'ev5', icon: Cat, color: 'lilac', title: 'Cat Owners’ Meet-up',
+    id: 'ev5', forSpecies: ['Cat'], icon: Cat, color: 'lilac', title: 'Cat Owners’ Meet-up',
     date: '2026-10-25T15:00', place: 'Community club, Tampines',
     tags: ['Socialising', 'Cuddles', 'Puzzles'], spots: 10,
     description: 'Calm indoor meet-up for cats and their humans, with a talk on cat licensing. Carriers required.',
   },
   {
-    id: 'ev6', icon: GraduationCap, color: 'blush', title: 'Puppy Manners Workshop',
+    id: 'ev6', forSpecies: ['Dog'], icon: GraduationCap, color: 'blush', title: 'Puppy Manners Workshop',
     date: '2026-10-28T19:30', place: 'Sengkang Riverside Park (dog run)',
     tags: ['Training', 'Socialising'], spots: 10,
     description: 'Sit, stay, loose-lead walking, and lift and void-deck etiquette for HDB living.',
@@ -77,16 +78,37 @@ export const EVENTS = [
 ]
 
 // ── Pet-friendly food places ────────────────────────────────────────────────
-// SAMPLE DATA: real neighbourhoods, made-up venue names.
+// SAMPLE DATA: real neighbourhoods and streets, made-up venue names, hours
+// and descriptions. Replace with real, verified places before launch.
+//
+// `hours` has one entry per day, starting with SUNDAY (that's how JavaScript
+// numbers days: Sunday = 0 … Saturday = 6). Each entry is
+// ['opens', 'closes'] in 24-hour Singapore time, or null if closed that day.
+// The "Open in Google Maps" button searches for name + address, so once a
+// place is real it will take people straight to it.
+const daily = (open, close) => Array(7).fill([open, close])
+
 export const FOOD_PLACES = [
   { id: 'fp1', icon: Coffee, color: 'sand', name: 'Kopi & Paws', type: 'Café',
-    area: 'Tiong Bahru', perks: ['Water bowls', 'Pup cups', 'Alfresco seating'] },
+    area: 'Tiong Bahru', address: 'Eng Hoon Street, Tiong Bahru',
+    hours: [['08:00', '17:00'], null, ['08:00', '17:00'], ['08:00', '17:00'], ['08:00', '17:00'], ['08:00', '21:00'], ['08:00', '21:00']],
+    about: 'Neighbourhood café with shaded outdoor tables. Dogs are welcome at the alfresco seats, and the staff keep a jar of treats by the door.',
+    perks: ['Water bowls', 'Pup cups', 'Alfresco seating'] },
   { id: 'fp2', icon: UtensilsCrossed, color: 'blush', name: 'The Barking Burger', type: 'Restaurant',
-    area: 'Dempsey Hill', perks: ['Dog menu', 'Shaded garden', 'Fans outside'] },
+    area: 'Dempsey Hill', address: 'Dempsey Road, Dempsey Hill',
+    hours: daily('11:30', '22:00'),
+    about: 'Burgers and a dedicated dog menu in a leafy garden setting. Best visited in the evening when it’s cooler.',
+    perks: ['Dog menu', 'Shaded garden', 'Fans outside'] },
   { id: 'fp3', icon: Croissant, color: 'lime', name: 'Paw & Crust Bakery', type: 'Bakery',
-    area: 'Katong', perks: ['Fresh dog treats', 'Birthday pup-cakes'] },
+    area: 'Katong', address: 'East Coast Road, Katong',
+    hours: [['09:00', '15:00'], ['09:00', '18:00'], ['09:00', '18:00'], null, ['09:00', '18:00'], ['09:00', '18:00'], ['09:00', '18:00']],
+    about: 'Bakery for humans and dogs, with fresh dog-safe treats daily. Order birthday pup-cakes three days ahead.',
+    perks: ['Fresh dog treats', 'Birthday pup-cakes'] },
   { id: 'fp4', icon: Soup, color: 'sky', name: 'Wag Bowl', type: 'Casual dining',
-    area: 'Holland Village', perks: ['Air-conditioned pet area', 'Treat jar at the counter'] },
+    area: 'Holland Village', address: 'Lorong Mambong, Holland Village',
+    hours: daily('11:00', '23:00'),
+    about: 'Casual rice and noodle bowls with an air-conditioned room where pets are allowed, a rare find in the Singapore heat.',
+    perks: ['Air-conditioned pet area', 'Treat jar at the counter'] },
 ]
 
 // ── Requirements: things Furly can check from a pet's profile ───────────────

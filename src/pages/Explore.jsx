@@ -4,13 +4,15 @@
 // Three views, switched with the toggle at the top:
 //   • Events: pet activities you can sign up for, sorted so the ones that
 //     match what your pet likes come first.
-//   • Food: pet-friendly cafés and restaurants.
+//   • Food: pet-friendly cafés and restaurants. Tap one for opening hours,
+//     the address and Google Maps (the popup lives in PlaceSheet.jsx).
 //   • Care: daycare & boarding, each with a badge saying whether your pet
 //     already meets that place's requirements (checked from its profile).
 // ─────────────────────────────────────────────────────────────────────────────
 import { useState } from 'react'
 import { CalendarDays, MapPin, Sparkles, Check, TriangleAlert, ChevronRight } from 'lucide-react'
 import { EVENTS, FOOD_PLACES, CARE_PLACES, REQUIREMENTS } from '../content.js'
+import PlaceSheet, { openStatus } from '../components/PlaceSheet.jsx'
 
 // "2026-10-17T07:30" → "Sat, 17 Oct, 7:30 am" (Singapore date style)
 export function formatDate(iso) {
@@ -40,8 +42,9 @@ const VIEWS = [
   { id: 'care', label: 'Care' },
 ]
 
-export default function Explore({ pet, signups, onToggle, initialView = 'events', goTo }) {
+export default function Explore({ pet, signups, onOpenEvent, initialView = 'events', goTo }) {
   const [view, setView] = useState(initialView)
+  const [openPlace, setOpenPlace] = useState(null) // food place shown in the popup
   const events = recommendEvents(pet)
   // Only show care places that accept this kind of pet.
   const carePlaces = CARE_PLACES.filter((p) => p.species.includes(pet.species))
@@ -66,42 +69,54 @@ export default function Explore({ pet, signups, onToggle, initialView = 'events'
         <>
           {events.length === 0 && <p className="empty">No upcoming events right now. Check back soon!</p>}
           {events.map((e) => {
-            const joined = signups.includes(e.id)
+            const joined = Boolean(signups[e.id])
             return (
-              <article key={e.id} className="card event-card">
-                <div className={'art ' + e.color}><e.icon size={34} strokeWidth={1.5} aria-hidden="true" /></div>
-                <div className="body">
+              // The whole card is one button: tapping anywhere opens the event popup.
+              // "Sign up" / "View ticket" looks like a button but is just a label,
+              // because a button can't contain another button.
+              <button key={e.id} className="card event-card tappable" onClick={() => onOpenEvent(e)}>
+                <span className={'art ' + e.color}><e.icon size={34} strokeWidth={1.5} aria-hidden="true" /></span>
+                <span className="body">
                   {e.matches.length > 0 && (
                     <span className="match"><Sparkles size={12} aria-hidden="true" /> {pet.name} loves {e.matches.join(' & ').toLowerCase()}</span>
                   )}
-                  <h3>{e.title}</h3>
+                  <span className="card-title">{e.title}</span>
                   <span className="meta"><CalendarDays size={14} aria-hidden="true" /> {formatDate(e.date)}</span>
                   <span className="meta"><MapPin size={14} aria-hidden="true" /> {e.place}</span>
-                  <p className="tiny muted" style={{ margin: '0.2rem 0 0' }}>{e.description}</p>
-                  <div className="actions">
-                    <button className={'btn ' + (joined ? '' : 'primary')} onClick={() => onToggle(e.id)} aria-pressed={joined}>
-                      {joined ? <><Check size={16} /> Going</> : 'Sign up'}
-                    </button>
-                  </div>
-                </div>
-              </article>
+                  <span className="tiny muted" style={{ marginTop: '0.2rem' }}>{e.description}</span>
+                  <span className="actions">
+                    <span className={'btn ' + (joined ? '' : 'primary')}>
+                      {joined
+                        ? <><Check size={16} aria-hidden="true" /> View ticket</>
+                        : 'Sign up'}
+                    </span>
+                  </span>
+                </span>
+              </button>
             )
           })}
         </>
       )}
 
-      {view === 'food' && FOOD_PLACES.map((p) => (
-        <article key={p.id} className="card event-card">
-          <div className={'art ' + p.color}><p.icon size={34} strokeWidth={1.5} aria-hidden="true" /></div>
-          <div className="body">
-            <h3>{p.name}</h3>
-            <span className="meta"><MapPin size={14} aria-hidden="true" /> {p.type} · {p.area}</span>
-            <div className="chips" style={{ marginTop: '0.35rem' }}>
-              {p.perks.map((perk) => <span key={perk} className="chip static">{perk}</span>)}
-            </div>
-          </div>
-        </article>
-      ))}
+      {/* Food: each card is a button that opens the place's popup */}
+      {view === 'food' && FOOD_PLACES.map((p) => {
+        const status = openStatus(p.hours)
+        return (
+          <button key={p.id} className="card event-card tappable" onClick={() => setOpenPlace(p)}>
+            <span className={'art ' + p.color}><p.icon size={34} strokeWidth={1.5} aria-hidden="true" /></span>
+            <span className="body">
+              <span className="card-title">{p.name}</span>
+              <span className="meta"><MapPin size={14} aria-hidden="true" /> {p.type} · {p.area}</span>
+              <span className={'meta ' + (status.open ? 'is-open' : '')}>{status.open ? '● ' : '○ '}{status.text}</span>
+              <span className="chips" style={{ marginTop: '0.35rem' }}>
+                {p.perks.map((perk) => <span key={perk} className="chip static">{perk}</span>)}
+              </span>
+            </span>
+            <ChevronRight className="card-chev" size={20} aria-hidden="true" />
+          </button>
+        )
+      })}
+      {openPlace && <PlaceSheet place={openPlace} onClose={() => setOpenPlace(null)} />}
 
       {view === 'care' && (
         <>

@@ -352,6 +352,36 @@ a  { color: var(--forest-2); font-weight: 600; }
 .pet-id-actions { display: flex; gap: 0.6rem; }
 .pet-id-actions .btn { flex: 1; }
 
+/* ── Event popup (bottom sheet) ── */
+.sheet {
+  position: fixed; z-index: 51; left: 50%; bottom: 0;
+  width: min(560px, 100%); max-height: 88vh; overflow-y: auto;
+  padding: 0.75rem var(--pad) calc(var(--pad) + env(safe-area-inset-bottom));
+  background: var(--surface); border-radius: 28px 28px 0 0;
+  box-shadow: var(--shadow-lg);
+  transform: translate(-50%, 100%);           /* starts just below the screen */
+  transition: transform 0.3s var(--ease);
+}
+.sheet.open { transform: translate(-50%, 0); } /* slides up into view */
+.sheet-handle { width: 40px; height: 5px; border-radius: 999px; background: var(--border); margin: 0 auto 0.5rem; }
+.sheet-close { position: absolute; top: 0.5rem; right: 0.5rem; }
+.sheet-hero { display: flex; align-items: center; gap: 1rem; margin: 0.75rem 0 1.25rem; padding-right: 2.5rem; }
+.sheet-hero .art { width: 84px; height: 84px; flex-shrink: 0; border-radius: var(--radius-sm); display: grid; place-items: center; color: var(--forest); }
+.sheet-facts { margin-bottom: 1rem; }
+.who-going { border: 0; padding: 0; margin: 1.25rem 0 0; }
+.who-going legend { margin-bottom: 0.5rem; }
+.chip:disabled { opacity: 0.55; cursor: not-allowed; text-decoration: line-through; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.sheet-calendar { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.sheet-calendar .btn { flex: 1; }
+.sheet-success { text-align: center; padding-top: 1.25rem; }
+.sheet-success .sheet-calendar { text-align: left; }
+.success-badge {
+  display: inline-grid; place-items: center;
+  width: 72px; height: 72px; border-radius: 50%; margin-bottom: 1rem;
+  background: var(--lime); color: var(--forest);
+}
+
 /* Respect people who turn off animations in their phone settings */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0.01ms !important; transition-delay: 0s !important; }
@@ -367,6 +397,21 @@ a  { color: var(--forest-2); font-weight: 600; }
 .needs { margin-top: 0.5rem; padding: 0.6rem 0.8rem 0.1rem; border-radius: var(--radius-sm); background: var(--warn-soft); }
 .needs ul { margin: 0.2rem 0 0; padding-left: 1.1rem; }
 .needs .link-btn { min-height: 40px; color: var(--forest); }
+/* Cards that open something when tapped (food places) */
+.card.tappable { width: 100%; border: 0; text-align: left; font: inherit; color: inherit; cursor: pointer; align-items: center; }
+.card.tappable:active { transform: scale(0.99); }
+.card.tappable .art { align-self: flex-start; }
+.card-chev { flex-shrink: 0; color: var(--muted); }
+.card-title { font-weight: 700; font-size: 1rem; }
+.meta.is-open { color: var(--good); font-weight: 700; }
+
+/* Opening hours table in the food popup */
+.hours { margin: 0.35rem 0 0; }
+.hours div { display: flex; justify-content: space-between; gap: 1rem; padding: 0.2rem 0; font-size: 0.9rem; }
+.hours dt { color: var(--muted); }
+.hours dd { margin: 0; font-weight: 600; text-align: right; }
+.hours .today dt, .hours .today dd { color: var(--text); font-weight: 800; }
+
 .match { display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; padding: 0.15rem 0.6rem; border-radius: 999px; background: var(--lime); color: var(--forest); font-size: 0.75rem; font-weight: 700; }
 
 /* Expandable sections (<details>): guides, Q&A, regulations */

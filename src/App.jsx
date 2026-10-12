@@ -18,6 +18,7 @@ import Pets, { PetForm } from './pages/Pets.jsx'
 import Travel from './pages/Travel.jsx'
 import Explore from './pages/Explore.jsx'
 import Settings from './pages/Settings.jsx'
+import EventSheet from './components/EventSheet.jsx'
 
 // The bottom tab bar. `id` is used internally, `label` and `icon` are shown.
 const TABS = [
@@ -33,7 +34,7 @@ export default function App() {
   const [user, setUser] = useStoredState('user', null)          // { name, email }
   const [pets, setPets] = useStoredState('pets', [])            // list of pet objects
   const [activePetId, setActivePetId] = useStoredState('activePet', null)
-  const [signups, setSignups] = useStoredState('signups', [])   // list of event ids
+  const [savedSignups, setSignups] = useStoredState('signups', {}) // which pets go to which event
   const [reminders, setReminders] = useStoredState('reminders', []) // { id, petId, title, date, time, repeat }
   const [emergency, setEmergency] = useStoredState('emergency', {
     contactName: '', contactPhone: '', vetName: '', vetPhone: '', vetAddress: '',
@@ -45,6 +46,8 @@ export default function App() {
   const [editingPet, setEditingPet] = useState(false) // opens the Health tab straight into "Edit"
 
   const [exploreView, setExploreView] = useState('events') // Events / Food / Care
+  const [selectedEvent, setSelectedEvent] = useState(null)        // event shown in the popup, or null
+  const [showConfirmation, setShowConfirmation] = useState(false) // popup shows "You're going!"
 
   // Switch tab and scroll back to the top, like a real app.
   // `view` optionally opens Explore on a specific toggle, e.g. goTo('explore', 'care').
@@ -57,6 +60,18 @@ export default function App() {
 
   // The pet currently selected in the switcher (falls back to the first one).
   const pet = pets.find((p) => p.id === activePetId) || pets[0]
+
+  // Event sign-ups, as { eventId: [petId, petId, ...] }, e.g. { ev1: ['a1', 'b2'] }.
+  // Older versions saved a plain list of event ids, so we convert those
+  // ("your first pet is going"). We also drop pets that have been deleted.
+  const signups = {}
+  const entries = Array.isArray(savedSignups)
+    ? savedSignups.map((id) => [id, pets[0] ? [pets[0].id] : []])
+    : Object.entries(savedSignups)
+  for (const [eventId, petIds] of entries) {
+    const stillHere = petIds.filter((id) => pets.some((p) => p.id === id))
+    if (stillHere.length) signups[eventId] = stillHere
+  }
 
   // Adds a new pet, or replaces an existing one with the same id.
   function savePet(updated) {
@@ -73,13 +88,6 @@ export default function App() {
     setPets((list) => list.filter((p) => p.id !== id))
   }
 
-  // Tapping "Sign up" again on the same event cancels it (a toggle).
-  function toggleSignup(eventId) {
-    setSignups((list) =>
-      list.includes(eventId) ? list.filter((id) => id !== eventId) : [...list, eventId],
-    )
-  }
-
   function addReminder(reminder) {
     setReminders((list) => [...list, reminder])
   }
@@ -91,6 +99,31 @@ export default function App() {
   function signOut() {
     clearAllData()
     window.location.reload() // simplest way to reset every piece of state
+  }
+
+  // ── Event popup (EventSheet) ──
+  // Opens the popup for an event. It floats over the page, so there's no
+  // need to scroll to the top.
+  function openEvent(event) {
+    setSelectedEvent(event)
+    setShowConfirmation(false)
+  }
+
+  function closeEvent() {
+    setSelectedEvent(null)
+    setShowConfirmation(false)
+  }
+
+  // Saves who's going to the open event (also used to change who's going).
+  function registerForEvent(petIds) {
+    setSignups({ ...signups, [selectedEvent.id]: petIds })
+    setShowConfirmation(true)
+  }
+
+  // Removes the open event from your sign-ups ("Cancel registration").
+  function cancelRegistration() {
+    const { [selectedEvent.id]: _cancelled, ...rest } = signups
+    setSignups(rest)
   }
 
   // ── Step 1: not signed in yet ──
@@ -138,7 +171,7 @@ export default function App() {
             onAddPet={() => setAddingPet(true)}
             onEditPet={() => { setTab('pets'); setEditingPet(true) }}
             signups={signups} reminders={reminders}
-            onAddReminder={addReminder} onDeleteReminder={deleteReminder}
+            onAddReminder={addReminder} onDeleteReminder={deleteReminder} onOpenEvent={openEvent}
             emergency={emergency} goTo={goTo}
           />
         )}
@@ -148,14 +181,32 @@ export default function App() {
         {tab === 'travel' && <Travel key={pet.id} pet={pet} goTo={goTo} />}
         {tab === 'explore' && (
           <Explore
-            key={pet.id + exploreView} pet={pet} signups={signups} onToggle={toggleSignup}
-            initialView={exploreView} goTo={goTo}
+            key={pet.id + exploreView}
+            pet={pet}
+            signups={signups}
+            onOpenEvent={openEvent}
+            initialView={exploreView}
+            goTo={goTo}
           />
         )}
         {tab === 'settings' && (
           <Settings user={user} emergency={emergency} onSaveEmergency={setEmergency} onSignOut={signOut} />
         )}
       </main>
+
+      {/* The event popup, shown on top of any tab when an event is selected */}
+      {selectedEvent && (
+        <EventSheet
+          event={selectedEvent}
+          pets={pets}
+          pet={pet}
+          goingPetIds={signups[selectedEvent.id] || []}
+          confirmed={showConfirmation}
+          onConfirm={registerForEvent}
+          onCancelSignup={cancelRegistration}
+          onClose={closeEvent}
+        />
+      )}
 
       <nav className="tabbar" aria-label="Main">
         {TABS.map((t) => (

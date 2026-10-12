@@ -109,10 +109,12 @@ export function buildAgenda({ pets, signups, reminders, from, to, includeOverdue
   // Events you've signed up for
   for (const e of EVENTS) {
     const date = e.date.slice(0, 10)
-    if (signups.includes(e.id) && date >= from && date <= to) {
+    const going = signups[e.id] // ids of the pets going, if any
+    if (going && date >= from && date <= to) {
+      const names = pets.filter((p) => going.includes(p.id)).map((p) => p.name).join(' & ')
       items.push({
         id: 'event-' + e.id, kind: 'event', event: e, date, time: e.date.slice(11, 16),
-        title: e.title, subtitle: e.place, icon: e.icon, color: e.color,
+        title: e.title, subtitle: many ? `${e.place} · ${names}` : e.place, icon: e.icon, color: e.color,
       })
     }
   }

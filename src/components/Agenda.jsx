@@ -87,7 +87,7 @@ function ReminderForm({ pets, defaultPetId, defaultDate, onSave, onCancel }) {
 }
 
 // ── One row in the list ─────────────────────────────────────────────────────
-function AgendaItem({ item, open, onToggle, onDeleteReminder, goTo }) {
+function AgendaItem({ item, open, onToggle, onDeleteReminder, onOpenEvent }) {
   return (
     <li className="agenda-item">
       <button className="row-item" onClick={onToggle} aria-expanded={open}>
@@ -111,7 +111,7 @@ function AgendaItem({ item, open, onToggle, onDeleteReminder, goTo }) {
             <ExternalLink size={16} /> Google Calendar
           </a>
           {item.kind === 'event' && (
-            <button className="btn" onClick={() => goTo('explore')}><Compass size={16} /> View event</button>
+            <button className="btn" onClick={() => onOpenEvent(item.event)}><Compass size={16} /> View event</button>
           )}
           {item.kind === 'reminder' && (
             <button
@@ -163,7 +163,7 @@ function MonthCalendar({ year, month, items, today, selectedDay, onSelect, onCha
 }
 
 // ── The whole section ───────────────────────────────────────────────────────
-export default function Agenda({ pets, pet, signups, reminders, onAddReminder, onDeleteReminder, goTo }) {
+export default function Agenda({ pets, pet, signups, reminders, onAddReminder, onDeleteReminder, onOpenEvent }) {
   const [selectedDay, setSelectedDay] = useState(null) // null = show everything
   const [openId, setOpenId] = useState(null)           // which row shows its buttons
   const [adding, setAdding] = useState(false)
@@ -277,7 +277,7 @@ export default function Agenda({ pets, pet, signups, reminders, onAddReminder, o
                   open={openId === item.id}
                   onToggle={() => setOpenId(openId === item.id ? null : item.id)}
                   onDeleteReminder={onDeleteReminder}
-                  goTo={goTo}
+                  onOpenEvent={onOpenEvent}
                 />
               ))}
             </ul>

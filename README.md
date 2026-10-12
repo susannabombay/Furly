@@ -5,7 +5,7 @@ A social pet app **for Singapore**. Pet owners sign in, set up a profile for eac
 - **Health**: breed, age, weight, microchip, vaccinations with due-date reminders, vet, allergies and medications.
 - **Travel**: flight and daycare checklists that tick themselves off from the pet's profile, plus Singapore rules: AVS licensing (PALS), HDB pet rules, export and import licences, and quarantine.
 - **Coming up** (Home): a 7-day strip (expandable to a full month calendar) and agenda combining event sign-ups, vaccine due dates and your own repeating reminders (e.g. monthly tick prevention), each addable to Apple, Outlook or Google Calendar.
-- **Explore**: pet events at Singapore parks and dog runs (pets that like swimming see swim events first), pet-friendly food places, and daycare & boarding with a badge showing whether your pet already meets each place's requirements.
+- **Explore**: pet events at Singapore parks and dog runs (pets that like swimming see swim events first), pet-friendly food places (tap for opening hours, address and Google Maps), and daycare & boarding with a badge showing whether your pet already meets each place's requirements.
 - **Settings**: your emergency vet and a backup person (one-tap call), Singapore's 24-hour vets and the AVS hotline, step-by-step first aid (heatstroke first), and a quick Q&A.
 
 > **Current stage: local first.** Everything is saved in your browser only. There are no real accounts or server yet, and the events and places are sample data. A real backend comes next.
@@ -43,6 +43,9 @@ Furly/
     ├── styles.css      The look: colours at the top, phone-first layout, animations.
     ├── components/
     │   ├── PetCard.jsx     The pet ID card that expands when tapped (Singpass-style)
+    │   ├── Sheet.jsx       Shared slide-up popup (dimmed background, close on X / tap outside / Escape)
+    │   ├── EventSheet.jsx  Event popup: who's going, confirm sign-up, ticket, cancel registration
+    │   ├── PlaceSheet.jsx  Food place popup: open now, opening hours, address, Google Maps
     │   └── Agenda.jsx      "Coming up" on Home: week strip, month calendar, agenda list, add-reminder form
     └── pages/          One file per screen:
         ├── SignIn.jsx      Name + email to get started

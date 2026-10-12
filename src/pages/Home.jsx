@@ -22,12 +22,12 @@ function greeting() {
 
 export default function Home({
   user, pets, pet, onSelectPet, onAddPet, onEditPet,
-  signups, reminders, onAddReminder, onDeleteReminder, emergency, goTo,
+  signups, reminders, onAddReminder, onDeleteReminder, onOpenEvent, emergency, goTo,
 }) {
   // Which card is expanded, and where it started on screen (for the animation).
   const [open, setOpen] = useState(null) // { pet, rect } or null
 
-  const recommended = recommendEvents(pet).filter((e) => !signups.includes(e.id)).slice(0, 4)
+  const recommended = recommendEvents(pet).filter((e) => !signups[e.id]).slice(0, 4)
   const firstName = user.name.split(' ')[0]
 
   // The emergency button calls your saved vet straight away if there is one.
@@ -84,7 +84,7 @@ export default function Home({
       {/* Events, vaccines and reminders on one timeline */}
       <Agenda
         pets={pets} pet={pet} signups={signups} reminders={reminders}
-        onAddReminder={onAddReminder} onDeleteReminder={onDeleteReminder} goTo={goTo}
+        onAddReminder={onAddReminder} onDeleteReminder={onDeleteReminder} onOpenEvent={onOpenEvent}
       />
 
       {/* Recommended events, as a swipeable row */}
@@ -96,7 +96,7 @@ export default function Home({
           </div>
           <div className="carousel">
             {recommended.map((e) => (
-              <button key={e.id} className="tile" onClick={() => goTo('explore')}>
+              <button key={e.id} className="tile" onClick={() => onOpenEvent(e)}>
                 <div>
                   <div className={'art ' + e.color}><e.icon size={36} strokeWidth={1.5} /></div>
                   <h3>{e.title}</h3>
