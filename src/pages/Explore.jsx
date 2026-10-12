@@ -7,12 +7,13 @@
 //   • Food places: pet-friendly cafés and restaurants.
 // ─────────────────────────────────────────────────────────────────────────────
 import { useState } from 'react'
+import { CalendarDays, MapPin, Sparkles, Check } from 'lucide-react'
 import { EVENTS, FOOD_PLACES } from '../content.js'
 
 // "2026-10-17T07:30" → "Sat, 17 Oct, 7:30 am" (Singapore date style)
 export function formatDate(iso) {
   return new Date(iso).toLocaleString('en-SG', {
-    weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit',
+    weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit',
   })
 }
 
@@ -31,6 +32,7 @@ export default function Explore({ pet, signups, onToggle }) {
 
   return (
     <>
+      <p className="eyebrow" style={{ margin: 0 }}>Singapore</p>
       <h1>Explore</h1>
 
       <div className="segmented" role="tablist">
@@ -40,23 +42,26 @@ export default function Explore({ pet, signups, onToggle }) {
 
       {view === 'events' && (
         <>
-          {events.length === 0 && <p className="muted">No upcoming events right now. Check back soon!</p>}
+          {events.length === 0 && <p className="empty">No upcoming events right now. Check back soon!</p>}
           {events.map((e) => {
             const joined = signups.includes(e.id)
             return (
-              <article key={e.id} className="card event">
-                <div className="event-emoji" aria-hidden="true">{e.emoji}</div>
-                <div className="grow">
-                  <h3>{e.title}</h3>
-                  <p className="tiny muted">{formatDate(e.date)} · {e.place}</p>
-                  <p>{e.description}</p>
+              <article key={e.id} className="card event-card">
+                <div className={'art ' + e.color}><e.icon size={34} strokeWidth={1.5} aria-hidden="true" /></div>
+                <div className="body">
                   {e.matches.length > 0 && (
-                    <p className="tiny match">✨ {pet.name} loves {e.matches.join(' & ').toLowerCase()}</p>
+                    <span className="match"><Sparkles size={12} aria-hidden="true" /> {pet.name} loves {e.matches.join(' & ').toLowerCase()}</span>
                   )}
+                  <h3>{e.title}</h3>
+                  <span className="meta"><CalendarDays size={14} aria-hidden="true" /> {formatDate(e.date)}</span>
+                  <span className="meta"><MapPin size={14} aria-hidden="true" /> {e.place}</span>
+                  <p className="tiny muted" style={{ margin: '0.2rem 0 0' }}>{e.description}</p>
+                  <div className="actions">
+                    <button className={'btn ' + (joined ? '' : 'primary')} onClick={() => onToggle(e.id)} aria-pressed={joined}>
+                      {joined ? <><Check size={16} /> Going</> : 'Sign up'}
+                    </button>
+                  </div>
                 </div>
-                <button className={'btn ' + (joined ? '' : 'primary')} onClick={() => onToggle(e.id)}>
-                  {joined ? '✓ Going' : 'Sign up'}
-                </button>
               </article>
             )
           })}
@@ -64,12 +69,14 @@ export default function Explore({ pet, signups, onToggle }) {
       )}
 
       {view === 'food' && FOOD_PLACES.map((p) => (
-        <article key={p.id} className="card event">
-          <div className="event-emoji" aria-hidden="true">{p.emoji}</div>
-          <div className="grow">
+        <article key={p.id} className="card event-card">
+          <div className={'art ' + p.color}><p.icon size={34} strokeWidth={1.5} aria-hidden="true" /></div>
+          <div className="body">
             <h3>{p.name}</h3>
-            <p className="tiny muted">{p.type} · {p.area}</p>
-            <div className="chips">{p.perks.map((perk) => <span key={perk} className="chip static">{perk}</span>)}</div>
+            <span className="meta"><MapPin size={14} aria-hidden="true" /> {p.type} · {p.area}</span>
+            <div className="chips" style={{ marginTop: '0.35rem' }}>
+              {p.perks.map((perk) => <span key={perk} className="chip static">{perk}</span>)}
+            </div>
           </div>
         </article>
       ))}

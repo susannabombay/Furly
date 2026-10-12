@@ -38,11 +38,13 @@ Furly/
     ├── App.jsx         The brain: holds all data, sign-in flow, top bar & tab bar.
     ├── storage.js      Saves/loads data (browser storage now, a real database later).
     ├── content.js      All fixed text: events, food places, travel rules, first aid, Q&A.
-    ├── styles.css      The look: colours at the top, dark mode, phone-first layout.
+    ├── styles.css      The look: colours at the top, phone-first layout, animations.
+    ├── components/
+    │   └── PetCard.jsx     The pet ID card that expands when tapped (Singpass-style)
     └── pages/          One file per screen:
         ├── SignIn.jsx      Name + email to get started
-        ├── Home.jsx        Dashboard: pet summary, health alerts, events, emergency button
-        ├── Pets.jsx        "Health" tab: pet profile form, vaccinations, medical notes
+        ├── Home.jsx        Dashboard: pet ID cards, quick actions, reminders, recommendations
+        ├── Pets.jsx        "Health" tab: pet profile form (with photo), vaccinations, medical notes
         ├── Travel.jsx      Flight & daycare checklists, destination rules
         ├── Explore.jsx     Events (with sign-up) and food places
         └── Settings.jsx    Emergency contacts, hotlines, first aid, Q&A, sign out
@@ -62,7 +64,8 @@ Furly/
 | Add or change an event, food place, first-aid guide or Q&A | `src/content.js` |
 | Add a new activity a pet can like | `ACTIVITIES` in `src/content.js` |
 | Add a travel checklist item | `FLIGHT_CHECKLIST` / `DAYCARE_CHECKLIST` in `src/content.js` |
-| Change the brand colour | `--brand` at the top of `src/styles.css` |
+| Change the colours | The variables at the top of `src/styles.css` (`--forest`, `--lime`, …) |
+| Change an icon | Pick one at [lucide.dev/icons](https://lucide.dev/icons) and swap the import |
 | Add a field to the pet profile | `EMPTY_PET` and `PetForm` in `src/pages/Pets.jsx` |
 | Add a new tab | `TABS` in `src/App.jsx`, plus a new file in `src/pages/` |
 

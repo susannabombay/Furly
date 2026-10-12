@@ -1,19 +1,21 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Pets.jsx: a pet's profile and health record
 //
-// This file exports three things:
+// This file exports:
 //   • PetForm:       the form for creating/editing a pet (also used during sign-up)
-//   • vaccineStatus: a helper that says if a vaccine is ok, due soon or overdue
+//   • ageFrom, vaccineStatus: small helpers used across the app
 //   • Pets (default): the "Health" tab screen
 // ─────────────────────────────────────────────────────────────────────────────
 import { useState } from 'react'
+import { Camera, Pencil, Syringe, Stethoscope, TriangleAlert, Pill, NotebookPen, Plus, X, Phone } from 'lucide-react'
 import { ACTIVITIES } from '../content.js'
 import { newId } from '../storage.js'
+import { PetPhoto } from '../components/PetCard.jsx'
 
 // A blank pet, used as the starting point for the "add pet" form.
 const EMPTY_PET = {
   name: '', species: 'Dog', breed: '', gender: 'Female', birthday: '',
-  weight: '', microchip: '', likes: [],
+  weight: '', microchip: '', licence: '', photo: '', likes: [],
   vetName: '', vetPhone: '', allergies: '', medications: '', conditions: '',
   vaccinations: [],
 }
@@ -27,6 +29,11 @@ export function ageFrom(birthday) {
   return months >= 12 ? `${Math.floor(months / 12)} yrs` : `${Math.max(months, 0)} mo`
 }
 
+// "2025-10-20" → "20 Oct 2025"
+export function formatDay(iso) {
+  return iso ? new Date(iso).toLocaleDateString('en-SG', { day: 'numeric', month: 'short', year: 'numeric' }) : ''
+}
+
 // Looks at a vaccine's due date and returns a label + colour class.
 // Each label starts with a symbol so the status is clear without seeing colour.
 export function vaccineStatus(vaccine) {
@@ -37,10 +44,35 @@ export function vaccineStatus(vaccine) {
   return { label: '✓ Up to date', tone: 'good' }
 }
 
+// Shrinks a photo from the phone's camera roll to 320px and turns it into
+// text (a "data URL") so it can be saved in browser storage. Full-size
+// phone photos are several MB and would quickly fill the storage up.
+function resizePhoto(file) {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const size = 320
+      const scale = size / Math.min(img.width, img.height) // crop to a square
+      const canvas = document.createElement('canvas')
+      canvas.width = canvas.height = size
+      canvas.getContext('2d').drawImage(
+        img,
+        (size - img.width * scale) / 2, (size - img.height * scale) / 2,
+        img.width * scale, img.height * scale,
+      )
+      URL.revokeObjectURL(img.src)
+      resolve(canvas.toDataURL('image/jpeg', 0.85))
+    }
+    img.src = URL.createObjectURL(file)
+  })
+}
+
 // ── PetForm: create or edit a pet's profile ─────────────────────────────────
 export function PetForm({ initial = EMPTY_PET, onSave, onCancel }) {
   // `draft` is the in-progress copy. Nothing is saved until "Save" is pressed.
-  const [draft, setDraft] = useState(initial)
+  // Spreading EMPTY_PET first means pets saved before a new field existed
+  // (like `licence`) still get a sensible empty value.
+  const [draft, setDraft] = useState({ ...EMPTY_PET, ...initial })
 
   // One small helper so every input can update its own field:
   //   <input onChange={field('breed')} />
@@ -54,6 +86,11 @@ export function PetForm({ initial = EMPTY_PET, onSave, onCancel }) {
     setDraft({ ...draft, likes })
   }
 
+  async function pickPhoto(e) {
+    const file = e.target.files[0]
+    if (file) setDraft({ ...draft, photo: await resizePhoto(file) })
+  }
+
   function handleSubmit(e) {
     e.preventDefault()
     onSave({ ...draft, id: draft.id || newId() })
@@ -61,6 +98,13 @@ export function PetForm({ initial = EMPTY_PET, onSave, onCancel }) {
 
   return (
     <form className="card form" onSubmit={handleSubmit}>
+      {/* The whole row is a <label>, so tapping anywhere opens the photo picker */}
+      <label className="photo-picker">
+        <PetPhoto pet={draft} size={72} />
+        <span className="btn"><Camera size={18} /> {draft.photo ? 'Change photo' : 'Add photo'}</span>
+        <input type="file" accept="image/*" onChange={pickPhoto} />
+      </label>
+
       <label>Name<input value={draft.name} onChange={field('name')} required /></label>
 
       <div className="row">
@@ -69,21 +113,24 @@ export function PetForm({ initial = EMPTY_PET, onSave, onCancel }) {
             <option>Dog</option><option>Cat</option><option>Other</option>
           </select>
         </label>
-        <label>Gender
+        <label>Sex
           <select value={draft.gender} onChange={field('gender')}>
             <option>Female</option><option>Male</option>
           </select>
         </label>
       </div>
 
-      <label>Breed<input value={draft.breed} onChange={field('breed')} placeholder="e.g. Golden Retriever" /></label>
+      <label>Breed<input value={draft.breed} onChange={field('breed')} placeholder="e.g. Toy Poodle" /></label>
 
       <div className="row">
         <label>Birthday<input type="date" value={draft.birthday} onChange={field('birthday')} /></label>
         <label>Weight (kg)<input type="number" step="0.1" min="0" value={draft.weight} onChange={field('weight')} /></label>
       </div>
 
-      <label>Microchip number<input value={draft.microchip} onChange={field('microchip')} placeholder="15 digits" /></label>
+      <div className="row">
+        <label>Microchip no.<input value={draft.microchip} onChange={field('microchip')} placeholder="15 digits" inputMode="numeric" /></label>
+        <label>AVS licence no.<input value={draft.licence} onChange={field('licence')} placeholder="From PALS" /></label>
+      </div>
 
       <fieldset>
         <legend>What does {draft.name || 'your pet'} love doing?</legend>
@@ -101,14 +148,16 @@ export function PetForm({ initial = EMPTY_PET, onSave, onCancel }) {
         </div>
       </fieldset>
 
-      <h3>Health</h3>
-      <div className="row">
-        <label>Vet name<input value={draft.vetName} onChange={field('vetName')} /></label>
-        <label>Vet phone<input type="tel" value={draft.vetPhone} onChange={field('vetPhone')} /></label>
+      <div className="form-section form">
+        <h3>Health</h3>
+        <div className="row">
+          <label>Vet name<input value={draft.vetName} onChange={field('vetName')} /></label>
+          <label>Vet phone<input type="tel" value={draft.vetPhone} onChange={field('vetPhone')} /></label>
+        </div>
+        <label>Allergies<input value={draft.allergies} onChange={field('allergies')} placeholder="e.g. chicken, flea bites" /></label>
+        <label>Medications<input value={draft.medications} onChange={field('medications')} placeholder="Name, dose, how often" /></label>
+        <label>Conditions / notes<textarea rows="2" value={draft.conditions} onChange={field('conditions')} /></label>
       </div>
-      <label>Allergies<input value={draft.allergies} onChange={field('allergies')} placeholder="e.g. chicken, flea bites" /></label>
-      <label>Medications<input value={draft.medications} onChange={field('medications')} placeholder="name, dose, how often" /></label>
-      <label>Conditions / notes<textarea rows="2" value={draft.conditions} onChange={field('conditions')} /></label>
 
       <div className="actions">
         {onCancel && <button type="button" className="btn" onClick={onCancel}>Cancel</button>}
@@ -123,12 +172,13 @@ function Vaccinations({ pet, onSave }) {
   const [name, setName] = useState('')
   const [given, setGiven] = useState('')
   const [due, setDue] = useState('')
+  const [adding, setAdding] = useState(false)
 
   function add(e) {
     e.preventDefault()
     const vaccine = { id: newId(), name, given, due }
     onSave({ ...pet, vaccinations: [...pet.vaccinations, vaccine] })
-    setName(''); setGiven(''); setDue('')
+    setName(''); setGiven(''); setDue(''); setAdding(false)
   }
 
   function remove(id) {
@@ -136,42 +186,53 @@ function Vaccinations({ pet, onSave }) {
   }
 
   return (
-    <section className="card">
-      <h2>💉 Vaccinations</h2>
-      {pet.vaccinations.length === 0 && <p className="muted">No vaccinations recorded yet.</p>}
-      <ul className="list">
-        {pet.vaccinations.map((v) => {
-          const status = vaccineStatus(v)
-          return (
-            <li key={v.id}>
-              <div>
-                <strong>{v.name}</strong>
-                <div className="tiny muted">
-                  {v.given && `Given ${v.given}`}{v.given && v.due && ' · '}{v.due && `Due ${v.due}`}
+    <section className="section">
+      <div className="section-head">
+        <h2>Vaccinations</h2>
+        {!adding && <button className="link-btn" onClick={() => setAdding(true)}><Plus size={16} /> Add</button>}
+      </div>
+      <div className="card">
+        {pet.vaccinations.length === 0 && !adding && <p className="empty">No vaccinations recorded yet.</p>}
+        <ul className="rows">
+          {pet.vaccinations.map((v) => {
+            const status = vaccineStatus(v)
+            return (
+              <li key={v.id} className="row-item">
+                <span className="icon-tile"><Syringe size={20} /></span>
+                <div className="grow">
+                  <strong>{v.name}</strong>
+                  <span className="tiny muted block">
+                    {v.given && `Given ${formatDay(v.given)}`}{v.given && v.due && ' · '}{v.due && `Due ${formatDay(v.due)}`}
+                  </span>
+                  <span className={'badge ' + status.tone} style={{ marginTop: '0.35rem' }}>{status.label}</span>
                 </div>
-              </div>
-              <span className={'badge ' + status.tone}>{status.label}</span>
-              <button className="icon-btn" onClick={() => remove(v.id)} aria-label={`Remove ${v.name}`}>✕</button>
-            </li>
-          )
-        })}
-      </ul>
+                <button className="icon-btn" onClick={() => remove(v.id)} aria-label={`Remove ${v.name}`}><X size={18} /></button>
+              </li>
+            )
+          })}
+        </ul>
 
-      <form className="form inline" onSubmit={add}>
-        <label>Vaccine<input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Rabies" required /></label>
-        <div className="row">
-          <label>Given<input type="date" value={given} onChange={(e) => setGiven(e.target.value)} /></label>
-          <label>Next due<input type="date" value={due} onChange={(e) => setDue(e.target.value)} /></label>
-        </div>
-        <button className="btn" type="submit">＋ Add vaccine</button>
-      </form>
+        {adding && (
+          <form className="form inline" onSubmit={add}>
+            <label>Vaccine<input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Rabies, 5-in-1" required autoFocus /></label>
+            <div className="row">
+              <label>Given<input type="date" value={given} onChange={(e) => setGiven(e.target.value)} /></label>
+              <label>Next due<input type="date" value={due} onChange={(e) => setDue(e.target.value)} /></label>
+            </div>
+            <div className="actions">
+              <button type="button" className="btn" onClick={() => setAdding(false)}>Cancel</button>
+              <button className="btn primary" type="submit">Save vaccine</button>
+            </div>
+          </form>
+        )}
+      </div>
     </section>
   )
 }
 
 // ── The Health tab ──────────────────────────────────────────────────────────
-export default function Pets({ pet, onSave, onDelete }) {
-  const [editing, setEditing] = useState(false)
+export default function Pets({ pet, startEditing = false, onSave, onDelete }) {
+  const [editing, setEditing] = useState(startEditing)
 
   if (editing) {
     return (
@@ -183,7 +244,7 @@ export default function Pets({ pet, onSave, onDelete }) {
           onCancel={() => setEditing(false)}
         />
         <button
-          className="btn danger"
+          className="btn danger block"
           onClick={() => confirm(`Delete ${pet.name}'s profile?`) && onDelete(pet.id)}
         >
           Delete {pet.name}
@@ -194,15 +255,28 @@ export default function Pets({ pet, onSave, onDelete }) {
 
   // Small label/value pairs shown in the profile card. Empty values are skipped.
   const facts = [
-    ['Breed', pet.breed], ['Gender', pet.gender], ['Age', ageFrom(pet.birthday)],
-    ['Weight', pet.weight && `${pet.weight} kg`], ['Microchip', pet.microchip],
+    ['Breed', pet.breed], ['Sex', pet.gender], ['Age', ageFrom(pet.birthday)],
+    ['Weight', pet.weight && `${pet.weight} kg`], ['Microchip', pet.microchip], ['AVS licence', pet.licence],
   ].filter(([, value]) => value)
+
+  // Medical notes as icon rows.
+  const notes = [
+    { icon: TriangleAlert, label: 'Allergies', value: pet.allergies },
+    { icon: Pill, label: 'Medications', value: pet.medications },
+    { icon: NotebookPen, label: 'Conditions', value: pet.conditions },
+  ]
 
   return (
     <>
       <div className="title-row">
-        <h1>{pet.name}</h1>
-        <button className="btn" onClick={() => setEditing(true)}>Edit</button>
+        <div className="row-item" style={{ padding: 0, border: 0 }}>
+          <PetPhoto pet={pet} size={56} />
+          <div>
+            <p className="eyebrow" style={{ margin: 0 }}>Health record</p>
+            <h1>{pet.name}</h1>
+          </div>
+        </div>
+        <button className="btn" onClick={() => setEditing(true)}><Pencil size={16} /> Edit</button>
       </div>
 
       <section className="card">
@@ -212,20 +286,31 @@ export default function Pets({ pet, onSave, onDelete }) {
           ))}
         </dl>
         {pet.likes.length > 0 && (
-          <div className="chips">{pet.likes.map((l) => <span key={l} className="chip static">{l}</span>)}</div>
+          <div className="chips" style={{ marginTop: '1rem' }}>
+            {pet.likes.map((l) => <span key={l} className="chip static">{l}</span>)}
+          </div>
         )}
       </section>
 
       <Vaccinations pet={pet} onSave={onSave} />
 
-      <section className="card">
-        <h2>🩺 Medical notes</h2>
-        <dl className="facts stacked">
-          <div><dt>Vet</dt><dd>{pet.vetName || '-'}{pet.vetPhone && <> · <a href={`tel:${pet.vetPhone}`}>{pet.vetPhone}</a></>}</dd></div>
-          <div><dt>Allergies</dt><dd>{pet.allergies || 'None recorded'}</dd></div>
-          <div><dt>Medications</dt><dd>{pet.medications || 'None recorded'}</dd></div>
-          <div><dt>Conditions</dt><dd>{pet.conditions || 'None recorded'}</dd></div>
-        </dl>
+      <section className="section">
+        <div className="section-head"><h2>Medical notes</h2></div>
+        <ul className="card rows">
+          <li className="row-item">
+            <span className="icon-tile"><Stethoscope size={20} /></span>
+            <div className="grow"><span className="tiny muted">Vet</span><strong>{pet.vetName || 'Not added'}</strong></div>
+            {pet.vetPhone && (
+              <a className="btn" href={`tel:${pet.vetPhone}`} aria-label={`Call ${pet.vetName || 'vet'}`}><Phone size={16} /> Call</a>
+            )}
+          </li>
+          {notes.map((n) => (
+            <li key={n.label} className="row-item">
+              <span className="icon-tile"><n.icon size={20} /></span>
+              <div className="grow"><span className="tiny muted">{n.label}</span><strong>{n.value || 'None recorded'}</strong></div>
+            </li>
+          ))}
+        </ul>
       </section>
     </>
   )

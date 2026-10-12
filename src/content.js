@@ -13,6 +13,14 @@
 //     re-check them before launch, and always confirm with AVS, the
 //     airline and a vet.
 // ─────────────────────────────────────────────────────────────────────────────
+// Icons come from lucide-react, a library of clean line icons.
+// Each one is a React component, e.g. <Footprints size={24} />.
+import {
+  Footprints, Waves, Target, Mountain, Cat, GraduationCap,
+  Coffee, UtensilsCrossed, Croissant, Soup,
+  Building2, PlaneTakeoff, PlaneLanding, Plane,
+  Thermometer, Pill, Wind, Bandage, Zap, PawPrint,
+} from 'lucide-react'
 
 // Activities a pet can "like". Shown as tappable chips on the pet form and
 // used to recommend matching events.
@@ -25,41 +33,42 @@ export const ACTIVITIES = [
 // SAMPLE DATA: the venues are real Singapore parks, but the events and
 // organisers are made up until real ones come from the database.
 // `tags` are matched against a pet's liked activities to recommend events.
+// `icon` + `color` draw the event's artwork (colours are defined in styles.css).
 // Events are early morning or evening on purpose: Singapore's midday heat
 // and hot pavements are hard on paws.
 export const EVENTS = [
   {
-    id: 'ev1', emoji: '🌳', title: 'Sunrise Pack Walk',
+    id: 'ev1', icon: Footprints, color: 'sage', title: 'Sunrise Pack Walk',
     date: '2026-10-17T07:30', place: 'Bishan-Ang Mo Kio Park (dog run)',
     tags: ['Walks', 'Socialising'], spots: 20,
     description: 'Easy 4 km loop along the river before it gets hot. All sizes welcome, leads required.',
   },
   {
-    id: 'ev2', emoji: '🏊', title: 'Doggy Splash Session',
+    id: 'ev2', icon: Waves, color: 'sky', title: 'Doggy Splash Session',
     date: '2026-10-18T09:00', place: 'Dog swimming pool, Pasir Ris',
     tags: ['Swimming', 'Beach', 'Fetch'], spots: 15,
     description: 'Supervised swim with life jackets available. The best way to cool off in this weather!',
   },
   {
-    id: 'ev3', emoji: '🎯', title: 'Beginner Agility Class',
+    id: 'ev3', icon: Target, color: 'lime', title: 'Beginner Agility Class',
     date: '2026-10-21T19:00', place: 'West Coast Park (dog run)',
     tags: ['Agility', 'Training', 'Running'], spots: 8,
     description: 'Tunnels, jumps and weave poles with a trainer, after sunset when it’s cooler.',
   },
   {
-    id: 'ev4', emoji: '🥾', title: 'Southern Ridges Morning Hike',
+    id: 'ev4', icon: Mountain, color: 'sand', title: 'Southern Ridges Morning Hike',
     date: '2026-10-24T07:00', place: 'Henderson Waves, Southern Ridges',
     tags: ['Hiking', 'Walks', 'Running'], spots: 12,
     description: 'Shaded 6 km route with water stops. Fit adult dogs only, leashed throughout.',
   },
   {
-    id: 'ev5', emoji: '🐱', title: 'Cat Owners’ Meet-up',
+    id: 'ev5', icon: Cat, color: 'lilac', title: 'Cat Owners’ Meet-up',
     date: '2026-10-25T15:00', place: 'Community club, Tampines',
     tags: ['Socialising', 'Cuddles', 'Puzzles'], spots: 10,
     description: 'Calm indoor meet-up for cats and their humans, with a talk on cat licensing. Carriers required.',
   },
   {
-    id: 'ev6', emoji: '🎓', title: 'Puppy Manners Workshop',
+    id: 'ev6', icon: GraduationCap, color: 'blush', title: 'Puppy Manners Workshop',
     date: '2026-10-28T19:30', place: 'Sengkang Riverside Park (dog run)',
     tags: ['Training', 'Socialising'], spots: 10,
     description: 'Sit, stay, loose-lead walking, and lift and void-deck etiquette for HDB living.',
@@ -69,13 +78,13 @@ export const EVENTS = [
 // ── Pet-friendly food places ────────────────────────────────────────────────
 // SAMPLE DATA: real neighbourhoods, made-up venue names.
 export const FOOD_PLACES = [
-  { id: 'fp1', emoji: '☕', name: 'Kopi & Paws', type: 'Café',
+  { id: 'fp1', icon: Coffee, color: 'sand', name: 'Kopi & Paws', type: 'Café',
     area: 'Tiong Bahru', perks: ['Water bowls', 'Pup cups', 'Alfresco seating'] },
-  { id: 'fp2', emoji: '🍔', name: 'The Barking Burger', type: 'Restaurant',
+  { id: 'fp2', icon: UtensilsCrossed, color: 'blush', name: 'The Barking Burger', type: 'Restaurant',
     area: 'Dempsey Hill', perks: ['Dog menu', 'Shaded garden', 'Fans outside'] },
-  { id: 'fp3', emoji: '🥐', name: 'Paw & Crust Bakery', type: 'Bakery',
+  { id: 'fp3', icon: Croissant, color: 'lime', name: 'Paw & Crust Bakery', type: 'Bakery',
     area: 'Katong', perks: ['Fresh dog treats', 'Birthday pup-cakes'] },
-  { id: 'fp4', emoji: '🍜', name: 'Wag Bowl', type: 'Casual dining',
+  { id: 'fp4', icon: Soup, color: 'sky', name: 'Wag Bowl', type: 'Casual dining',
     area: 'Holland Village', perks: ['Air-conditioned pet area', 'Treat jar at the counter'] },
 ]
 
@@ -116,7 +125,7 @@ export const DAYCARE_CHECKLIST = [
 // Short summaries with a link to the official source for each topic.
 export const REGULATIONS = [
   {
-    region: '🇸🇬 Owning a pet in Singapore',
+    icon: Building2, region: 'Owning a pet in Singapore',
     points: [
       'Dogs over 3 months must be microchipped and licensed with AVS on PALS.',
       'Pet cats must also be microchipped and licensed on PALS.',
@@ -127,7 +136,7 @@ export const REGULATIONS = [
     link: 'https://pals.avs.gov.sg',
   },
   {
-    region: '🛫 Taking your pet out of Singapore',
+    icon: PlaneTakeoff, region: 'Taking your pet out of Singapore',
     points: [
       'Get an AVS export licence on the GoBusiness Licensing Portal: S$50, issued about 2 working days after you submit everything, valid 90 days.',
       'If the destination needs a health certificate, get one from a licensed vet and have AVS endorse it.',
@@ -137,7 +146,7 @@ export const REGULATIONS = [
     link: 'https://avs.nparks.gov.sg/pets/importing-exporting-a-pet/export/dogs-and-cats/',
   },
   {
-    region: '🛬 Bringing a pet into Singapore',
+    icon: PlaneLanding, region: 'Bringing a pet into Singapore',
     points: [
       'License the pet on PALS first, then get an AVS import licence before arrival (S$50, or S$100 express; valid 90 days).',
       'ISO microchip, core vaccinations, and pet at least 12 weeks old.',
@@ -148,7 +157,7 @@ export const REGULATIONS = [
     link: 'https://avs.nparks.gov.sg/pets/importing-exporting-a-pet/import/dogs-and-cats/',
   },
   {
-    region: '✈️ Flying from Changi',
+    icon: Plane, region: 'Flying from Changi',
     points: [
       'Most airlines flying from Singapore don’t allow pets in the cabin. Pets travel in the hold as checked baggage or cargo, and some airlines don’t carry pets at all.',
       'Many airlines won’t carry snub-nosed breeds (pugs, French bulldogs, Persians) because of heat and breathing risks.',
@@ -161,7 +170,7 @@ export const REGULATIONS = [
 // ── Emergency: first-aid guides ─────────────────────────────────────────────
 export const EMERGENCY_GUIDES = [
   {
-    title: '🥵 Heatstroke (most common in Singapore)',
+    icon: Thermometer, title: 'Heatstroke (most common in Singapore)',
     steps: [
       'Signs: heavy panting, drooling, bright red gums, wobbliness, collapse.',
       'Move to shade or air conditioning immediately.',
@@ -171,7 +180,7 @@ export const EMERGENCY_GUIDES = [
     ],
   },
   {
-    title: '🍫 Ate something toxic',
+    icon: Pill, title: 'Ate something toxic',
     steps: [
       'Remove any remaining item and keep the packaging.',
       'Do NOT make your pet vomit unless a vet tells you to.',
@@ -180,7 +189,7 @@ export const EMERGENCY_GUIDES = [
     ],
   },
   {
-    title: '😮‍💨 Choking',
+    icon: Wind, title: 'Choking',
     steps: [
       'Open the mouth and look. Remove the object only if you can see it and grab it easily.',
       'Small pets: hold them with head down and give firm back blows between the shoulders.',
@@ -189,7 +198,7 @@ export const EMERGENCY_GUIDES = [
     ],
   },
   {
-    title: '🩸 Bleeding',
+    icon: Bandage, title: 'Bleeding',
     steps: [
       'Press a clean cloth or gauze firmly on the wound for at least 3 minutes.',
       'If blood soaks through, add more layers. Don’t remove the first one.',
@@ -197,7 +206,7 @@ export const EMERGENCY_GUIDES = [
     ],
   },
   {
-    title: '⚡ Seizure',
+    icon: Zap, title: 'Seizure',
     steps: [
       'Keep hands away from the mouth. Pets don’t swallow their tongue.',
       'Move furniture away and dim lights and noise.',
@@ -206,7 +215,7 @@ export const EMERGENCY_GUIDES = [
     ],
   },
   {
-    title: '🐕 Found an injured or lost animal',
+    icon: PawPrint, title: 'Found an injured or lost animal',
     steps: [
       'Keep a safe distance if the animal is scared: injured animals may bite.',
       'Call the AVS Animal Response Centre (24 hours): 1800 476 1600.',

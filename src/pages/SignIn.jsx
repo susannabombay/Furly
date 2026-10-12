@@ -7,6 +7,7 @@
 // sign-in function instead and the rest of the app stays the same.
 // ─────────────────────────────────────────────────────────────────────────────
 import { useState } from 'react'
+import { PawPrint } from 'lucide-react'
 
 export default function SignIn({ onSignIn }) {
   const [name, setName] = useState('')
@@ -19,9 +20,9 @@ export default function SignIn({ onSignIn }) {
 
   return (
     <main className="page narrow signin">
-      <div className="hero-paw" aria-hidden="true">🐾</div>
+      <div className="brand-mark" aria-hidden="true"><PawPrint size={32} /></div>
       <h1>Furly</h1>
-      <p className="muted">Health, travel and friends for your pet, all in one place.</p>
+      <p className="lead">Health, travel and friends for your pet, all in one place.</p>
 
       <form className="card form" onSubmit={handleSubmit}>
         <label>
@@ -32,8 +33,8 @@ export default function SignIn({ onSignIn }) {
           Email
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
         </label>
-        <button className="btn primary" type="submit">Get started</button>
-        <p className="tiny muted">Your data stays on this device for now.</p>
+        <button className="btn primary block" type="submit">Get started</button>
+        <p className="tiny muted" style={{ margin: 0, textAlign: 'center' }}>Your data stays on this device for now.</p>
       </form>
     </main>
   )
