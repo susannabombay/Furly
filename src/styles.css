@@ -35,6 +35,7 @@
   --warn: #7A4B00;  --warn-soft: #FCEBC7;
   --bad:  #B42318;  --bad-soft:  #FDE4E1;
   --tap: 48px;            /* minimum size of anything you can tap */
+  --pad: 1.4rem;          /* inner spacing of every card */
   --radius: 22px;
   --radius-sm: 14px;
   --shadow: 0 1px 2px rgb(22 36 28 / 0.04), 0 4px 16px rgb(22 36 28 / 0.05);
@@ -125,7 +126,7 @@ a  { color: var(--forest-2); font-weight: 600; }
   background: var(--surface);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 1.1rem;
+  padding: var(--pad);
   margin-bottom: 0.9rem;
 }
 
@@ -136,7 +137,7 @@ a  { color: var(--forest-2); font-weight: 600; }
 .rows { list-style: none; padding: 0; margin: 0; }
 /* A list that is also a card keeps the card's inner spacing (otherwise
    the rule above would remove it and the icons would touch the edge). */
-.card.rows { padding: 1.1rem; margin-bottom: 0.9rem; }
+.card.rows { padding: var(--pad); margin-bottom: 0.9rem; }
 .row-item {
   display: flex; align-items: center; gap: 0.85rem;
   padding: 0.75rem 0;
@@ -357,7 +358,7 @@ a  { color: var(--forest-2); font-weight: 600; }
 }
 
 /* ── 7. Explore: event and place cards ─────────────────────────────────── */
-.event-card { display: flex; gap: 0.9rem; align-items: stretch; padding: 0.75rem; }
+.event-card { display: flex; gap: 1rem; align-items: stretch; padding: 1rem; }
 .event-card .art { width: 84px; height: 84px; align-self: flex-start; flex-shrink: 0; border-radius: var(--radius-sm); display: grid; place-items: center; color: var(--forest); }
 .event-card .body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.3rem; padding: 0.25rem 0; }
 .event-card .meta { display: flex; align-items: center; gap: 0.35rem; font-size: 0.82rem; color: var(--muted); }
@@ -369,18 +370,25 @@ a  { color: var(--forest-2); font-weight: 600; }
 .match { display: inline-flex; align-items: center; gap: 4px; align-self: flex-start; padding: 0.15rem 0.6rem; border-radius: 999px; background: var(--lime); color: var(--forest); font-size: 0.75rem; font-weight: 700; }
 
 /* Expandable sections (<details>): guides, Q&A, regulations */
+/* The card's spacing sits on <details> itself (not on the text inside),
+   so the space under the last line can't "collapse" away. */
 details.card { padding: 0; }
+details.card[open] { padding-bottom: var(--pad); }
 details summary {
   display: flex; align-items: center; gap: 0.85rem;
-  min-height: 64px; padding: 0.75rem 1.1rem;
+  min-height: 72px; padding: 0.9rem var(--pad);
   cursor: pointer; font-weight: 700; list-style: none;
 }
 details summary::-webkit-details-marker { display: none; }
 details summary .chev { margin-left: auto; color: var(--muted); transition: transform 0.2s; }
 details[open] summary .chev { transform: rotate(90deg); }
-details > :not(summary) { margin: 0 1.1rem 1.1rem; }
-details ol, details ul { padding-left: 1.25rem; color: var(--text); }
-details li { margin-bottom: 0.4rem; }
+/* A thin line separates the title from the content once it's open */
+details[open] summary { border-bottom: 1px solid var(--border); margin-bottom: 1.1rem; }
+details > :not(summary) { margin: 0 var(--pad) 0.75rem; }
+details > :last-child { margin-bottom: 0; }
+details ol, details ul { padding-left: 1.4rem; color: var(--text); line-height: 1.55; }
+details li { margin-bottom: 0.6rem; padding-left: 0.2rem; }
+details li:last-child { margin-bottom: 0; }
 
 /* Travel checklists */
 .checklist { list-style: none; padding: 0; margin: 0; }
