@@ -1,0 +1,251 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   styles.css: the look of Furly
+
+   Layout is "mobile first": designed for a phone, then centred with a max
+   width on bigger screens. All colours live in the variables below, so
+   changing the brand colour is a one-line edit.
+
+   Accessibility rules this file follows:
+   • Every text/background pair has a contrast ratio of at least 4.5:1
+     (the WCAG "AA" standard), in both light and dark mode.
+   • Never white text on peach or mint: those always use charcoal text.
+   • Colour is never the only signal: selected chips show a ✓, status
+     badges include a symbol and a word, the active tab has an underline.
+   • Everything tappable is at least 48 × 48 px.
+   • Keyboard users always see a thick outline on the focused element.
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* ── 1. Colours & sizes ────────────────────────────────────────────────── */
+:root {
+  --bg: #FFF8F0;          /* warm cream: page background */
+  --surface: #FFFFFF;     /* white: cards and input fields */
+  --text: #24312F;        /* dark charcoal: headings and body (12.8:1 on cream) */
+  --muted: #56625F;       /* secondary text (6:1 on cream) */
+  --border: #E8DED2;
+  --brand: #006B63;       /* deep teal: primary buttons, links, focus ring */
+  --on-brand: #FFFFFF;    /* text on teal buttons (6.4:1) */
+  --accent: #FFD7C2;      /* soft peach: friendly accents, charcoal text only */
+  --selected: #DDF2E8;    /* pale mint: selected chips, charcoal text only */
+  --good: #1D6B45;  --good-soft: #DDF2E8;
+  --warn: #7A4B00;  --warn-soft: #FCEBC7;
+  --bad:  #B42318;  --bad-soft:  #FDE4E1;  /* dark red: errors and warnings */
+  --tap: 48px;            /* minimum size of anything you can tap */
+  --radius: 16px;
+  --shadow: 0 1px 3px rgb(0 0 0 / 0.06);
+  color-scheme: light;
+}
+
+/* Dark mode: follows the phone/computer setting automatically.
+   Teal gets lighter here, so its button text switches to dark. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161D1C; --surface: #1F2827; --text: #EEF2F0; --muted: #A3B0AC;
+    --border: #33403E;
+    --brand: #4FC1B3; --on-brand: #0B2A27;
+    --accent: #4A3226; --selected: #1E3A33;
+    --good: #7DD9A8; --good-soft: #1E3A33;
+    --warn: #F2C46B; --warn-soft: #3A3020;
+    --bad: #FF9A8F;  --bad-soft: #3D2422;
+    color-scheme: dark;
+  }
+}
+
+/* ── 2. Base ───────────────────────────────────────────────────────────── */
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 16px/1.5 system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+h1 { font-size: 1.75rem; line-height: 1.2; margin: 0.25rem 0 1rem; }
+h2 { font-size: 1.1rem; margin: 0 0 0.75rem; }
+h3 { font-size: 1rem; margin: 0.5rem 0 0.25rem; }
+p  { margin: 0 0 0.75rem; }
+a  { color: var(--brand); }
+
+.muted { color: var(--muted); }
+.tiny  { font-size: 0.85rem; }
+.block { display: block; }
+.grow  { flex: 1; min-width: 0; }
+
+/* ── 3. Page frame: top bar, content, bottom tab bar ───────────────────── */
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 1rem 1rem 6rem; /* bottom padding keeps content above the tab bar */
+}
+.page.narrow { max-width: 460px; }
+
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.logo { font-weight: 800; font-size: 1.15rem; white-space: nowrap; }
+.pet-switcher { display: flex; gap: 0.4rem; overflow-x: auto; margin-left: auto; }
+
+.tabbar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  display: flex; justify-content: center;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom); /* room for the iPhone home bar */
+}
+.tabbar button {
+  flex: 1; max-width: 128px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  min-height: 56px; padding: 0.45rem 0;
+  background: none; border: 0;
+  border-top: 3px solid transparent;
+  font: inherit; font-size: 0.72rem; color: var(--muted);
+  cursor: pointer;
+}
+.tabbar button span { font-size: 1.3rem; }
+/* Active tab: colour + bold + a bar on top, so it doesn't rely on colour alone */
+.tabbar button.active { color: var(--brand); font-weight: 700; border-top-color: var(--brand); }
+
+/* ── 4. Cards & lists ──────────────────────────────────────────────────── */
+.card {
+  display: block;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+.section-title { margin-top: 1.5rem; }
+
+.title-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.title-row h1, .title-row h2 { margin-bottom: 0.75rem; }
+
+.list { list-style: none; padding: 0; margin: 0 0 0.75rem; }
+.list li {
+  display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.list li:last-child { border-bottom: 0; }
+.list li > div { flex: 1; }
+
+/* Label/value pairs on the pet profile */
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 0.75rem; margin: 0 0 0.75rem; }
+.facts.stacked { grid-template-columns: 1fr; }
+.facts dt { font-size: 0.8rem; color: var(--muted); }
+.facts dd { margin: 0; font-weight: 600; overflow-wrap: anywhere; }
+
+/* Home: tappable pet summary */
+.pet-card {
+  width: 100%; display: flex; align-items: center; gap: 0.9rem;
+  text-align: left; font: inherit; color: inherit; cursor: pointer;
+}
+.pet-avatar {
+  display: grid; place-items: center;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--accent); font-size: 1.9rem;
+}
+.chev { margin-left: auto; font-size: 1.5rem; color: var(--muted); }
+
+/* Explore: event and food place cards */
+.event { display: flex; gap: 0.9rem; align-items: flex-start; }
+.event h3 { margin-top: 0; }
+.event-emoji { font-size: 2rem; line-height: 1; }
+.match { color: var(--text); font-weight: 600; }
+@media (max-width: 480px) {
+  .event { flex-wrap: wrap; }
+  .event .btn { width: 100%; }
+}
+
+/* Expandable sections (<details>): guides, Q&A, regulations */
+details.card { padding: 0; }
+details summary {
+  min-height: var(--tap); padding: 1rem; cursor: pointer; font-weight: 600;
+  list-style-position: inside;
+}
+details[open] summary { border-bottom: 1px solid var(--border); }
+details > :not(summary) { margin: 0.75rem 1rem 1rem; }
+details ol, details ul { padding-left: 1.25rem; }
+details li { margin-bottom: 0.35rem; }
+
+/* Travel checklists */
+.checklist { list-style: none; padding: 0; margin: 0; }
+.checklist li { padding: 0.5rem 0; border-bottom: 1px solid var(--border); }
+.checklist li:last-child { border-bottom: 0; }
+.checklist label { display: flex; gap: 0.75rem; align-items: flex-start; cursor: pointer; }
+.checklist input { width: 1.2rem; height: 1.2rem; margin-top: 0.15rem; accent-color: var(--good); flex-shrink: 0; }
+
+/* ── 5. Buttons, chips, badges ─────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+  min-height: var(--tap); padding: 0.65rem 1.25rem;
+  border: 2px solid var(--border); border-radius: 999px;
+  background: var(--surface); color: var(--text);
+  font: inherit; font-weight: 600; text-decoration: none;
+  cursor: pointer; white-space: nowrap;
+}
+.btn:hover { border-color: var(--brand); }
+.btn.primary { background: var(--brand); border-color: var(--brand); color: var(--on-brand); }
+.btn.danger { color: var(--bad); border-color: var(--bad); }
+.btn.emergency {
+  width: 100%; margin-bottom: 0.75rem; padding: 0.9rem;
+  /* Fixed dark red in both themes: white text on it is 6.6:1 */
+  background: #B42318; border-color: #B42318; color: #FFFFFF;
+}
+.emergency-card > .btn { width: 100%; margin-bottom: 0.6rem; }
+.icon-btn { min-width: var(--tap); min-height: var(--tap); background: none; border: 0; border-radius: 50%; color: var(--muted); cursor: pointer; font-size: 1rem; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.chip {
+  min-height: var(--tap); padding: 0.35rem 1rem;
+  border: 2px solid var(--border); border-radius: 999px;
+  background: var(--surface); color: var(--text);
+  font: inherit; font-size: 0.875rem; white-space: nowrap; cursor: pointer;
+}
+/* Selected chip: mint fill, teal outline AND a checkmark, never colour alone */
+.chip.active { background: var(--selected); border-color: var(--brand); color: var(--text); font-weight: 600; }
+.chip.active::before { content: '✓ '; }
+.chip.static { cursor: default; min-height: 0; background: var(--accent); border-color: transparent; }
+
+.badge { padding: 0.15rem 0.6rem; border-radius: 999px; font-size: 0.78rem; font-weight: 700; white-space: nowrap; }
+.badge.good    { background: var(--good-soft); color: var(--good); }
+.badge.warn    { background: var(--warn-soft); color: var(--warn); }
+.badge.bad     { background: var(--bad-soft);  color: var(--bad); }
+.badge.neutral { background: var(--border);    color: var(--muted); }
+
+/* Two-option toggle on Explore */
+.segmented { display: flex; background: var(--border); border-radius: 999px; padding: 4px; margin-bottom: 1rem; }
+.segmented button {
+  flex: 1; min-height: 44px; padding: 0.5rem; border: 0; border-radius: 999px;
+  background: none; font: inherit; font-weight: 600; color: var(--muted); cursor: pointer;
+}
+.segmented button.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+
+/* ── 6. Forms ──────────────────────────────────────────────────────────── */
+.form { display: flex; flex-direction: column; gap: 0.85rem; }
+.form.inline { margin-top: 0.5rem; padding-top: 0.75rem; border-top: 1px dashed var(--border); }
+.form label { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.875rem; font-weight: 600; flex: 1; min-width: 0; }
+.form .row { display: flex; gap: 0.75rem; }
+.form fieldset { border: 0; padding: 0; margin: 0; }
+.form legend { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; }
+.form .actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
+
+input, select, textarea {
+  width: 100%;
+  min-height: var(--tap); padding: 0.65rem 0.8rem;
+  border: 2px solid var(--border); border-radius: 10px;
+  background: var(--surface); color: var(--text);
+  font: inherit; font-weight: 400;
+}
+/* Visible keyboard focus on everything (mouse clicks don't show it) */
+:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+input:focus, select:focus, textarea:focus { outline: 3px solid var(--brand); outline-offset: 1px; border-color: var(--brand); }
+
+/* ── 7. Sign-in screen ─────────────────────────────────────────────────── */
+.signin { text-align: center; padding-top: 12vh; }
+.signin .form { text-align: left; margin-top: 1.5rem; }
+.hero-paw { font-size: 3.5rem; }

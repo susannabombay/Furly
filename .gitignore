@@ -1,0 +1,14 @@
+# Files git should never upload to GitHub.
+
+# Downloaded packages: anyone can recreate this folder with `npm install`
+node_modules/
+
+# The built website: recreated with `npm run build`
+dist/
+
+# Mac system clutter
+.DS_Store
+
+# Secret keys (we'll need these once we add a real backend)
+.env
+.env.local
